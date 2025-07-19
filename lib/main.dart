@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'injection_container.dart' as di;
-import 'features/auth/presentation/pages/login_page.dart';
-import 'features/auth/presentation/pages/seguros_page.dart';
-import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/presentation/pages/login_page.dart';
+import 'features/presentation/pages/seguros_page.dart';
+import 'features/presentation/bloc/auth/auth_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
