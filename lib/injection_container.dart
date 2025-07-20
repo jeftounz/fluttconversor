@@ -7,9 +7,19 @@ import 'features/domain/repositories/auth_repository.dart';
 import 'features/domain/usecases/login_usecase.dart';
 import 'features/presentation/bloc/auth/auth_bloc.dart';
 
+// SEGUROS imports
+import 'features/data/datasources/seguros_remote_data_source.dart';
+import 'features/data/repositories/seguros_repository_impl.dart';
+import 'features/domain/repositories/seguros_repository.dart';
+import 'features/domain/usecases/submit_seguro_usecase.dart';
+import 'features/presentation/bloc/seguros/seguros_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  // ========================
+  // AUTH FEATURE
+  // ========================
   // BLoC
   sl.registerFactory(() => AuthBloc(loginUseCase: sl()));
 
@@ -26,7 +36,24 @@ Future<void> init() async {
     () => AuthRemoteDataSourceImpl(dio: sl()),
   );
 
+  // ========================
+  // SEGUROS FEATURE
+  // ========================
+  sl.registerLazySingleton<SegurosRemoteDataSource>(
+    () => SegurosRemoteDataSourceImpl(),
+  );
+
+  sl.registerLazySingleton<SegurosRepository>(
+    () => SegurosRepositoryImpl(sl()),
+  );
+
+  sl.registerLazySingleton(() => SubmitSeguroUseCase(sl()));
+
+  sl.registerFactory(() => SegurosBloc(sl()));
+
+  // ========================
   // External dependencies
+  // ========================
   sl.registerLazySingleton(
     () =>
         Dio()
