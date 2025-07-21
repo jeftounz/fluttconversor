@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:dio/dio.dart';
 import '../../../domain/usecases/login_usecase.dart';
-
 part 'auth_event.dart';
 part 'auth_state.dart';
 

@@ -1,24 +1,48 @@
 // features/presentation/bloc/seguros_bloc.dart
+
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../domain/usecases/submit_seguro_usecase.dart';
 import 'seguros_event.dart';
 import 'seguros_state.dart';
+import '../../../domain/usecases/submit_seguro_usecase.dart';
 
 class SegurosBloc extends Bloc<SegurosEvent, SegurosState> {
   final SubmitSeguroUseCase useCase;
 
-  SegurosBloc(this.useCase) : super(SegurosInitial()) {
+  SegurosBloc(this.useCase) : super(const SegurosState()) {
+    on<SetPaymentPlanEvent>((event, emit) {
+      emit(state.copyWith(selectedPaymentPlan: event.plan));
+      print('Plan seleccionado: ${event.plan.name}');
+    });
+
+    on<SetInsuranceTypeEvent>((event, emit) {
+      emit(state.copyWith(selectedInsuranceType: event.type));
+      print('Tipo de seguro seleccionado: ${event.type.name}');
+    });
+
     on<SubmitSeguroEvent>((event, emit) async {
-      emit(SegurosLoading());
+      emit(state.copyWith(status: SegurosStatus.loading));
       try {
-        final result = await useCase(event.data);
-        if (result) {
-          emit(SegurosSuccess());
+        final success = await useCase({
+          'paymentPlan': state.selectedPaymentPlan?.name,
+          'insuranceType': state.selectedInsuranceType?.name,
+        });
+        if (success) {
+          emit(state.copyWith(status: SegurosStatus.success));
         } else {
-          emit(SegurosError("Error al enviar el seguro"));
+          emit(
+            state.copyWith(
+              status: SegurosStatus.error,
+              errorMessage: "Error al enviar el seguro",
+            ),
+          );
         }
       } catch (e) {
-        emit(SegurosError("Error inesperado: \$e"));
+        emit(
+          state.copyWith(
+            status: SegurosStatus.error,
+            errorMessage: "Error inesperado: $e",
+          ),
+        );
       }
     });
   }
