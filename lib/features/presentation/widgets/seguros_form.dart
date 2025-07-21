@@ -20,7 +20,7 @@ class SegurosForm extends StatelessWidget {
             _buildHeader(context),
             const Expanded(child: _BodyContent()),
             const _PriceSection(),
-            _ContinueButton(),
+            const _ContinueButton(),
           ],
         ),
       ),
@@ -66,7 +66,11 @@ class SegurosForm extends StatelessWidget {
             right: 16,
             top: 12,
             child: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
+              onTap: () {
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/login', (route) => false);
+              },
               child: const Icon(Icons.close, color: Colors.white, size: 30),
             ),
           ),
@@ -108,7 +112,7 @@ class _BodyContent extends StatelessWidget {
           const SizedBox(height: 24),
           const Text('Seleccione tipo de seguro'),
           const SizedBox(height: 12),
-          const Text('Responsabilidad civil de vehiculos'),
+          const Text('Responsabilidad civil de vehículos'),
           const SizedBox(height: 24),
           Row(
             children: const [
@@ -190,6 +194,8 @@ class _PriceSection extends StatelessWidget {
 }
 
 class _ContinueButton extends StatelessWidget {
+  const _ContinueButton();
+
   @override
   Widget build(BuildContext context) {
     return Container(

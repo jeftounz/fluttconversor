@@ -64,8 +64,11 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const LoginPage(),
-        routes: {'/seguros': (context) => const SegurosPage()},
+        initialRoute: '/login',
+        routes: {
+          '/login': (context) => const LoginPage(),
+          '/seguros': (context) => const SegurosPage(),
+        },
       ),
     );
   }
