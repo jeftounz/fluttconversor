@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'injection_container.dart' as di;
 import 'features/presentation/pages/login_page.dart';
 import 'features/presentation/pages/seguros_page.dart';
+import 'features/presentation/pages/datos_personales_page.dart'; // <--- Importa aquí
 import 'features/presentation/bloc/auth/auth_bloc.dart';
 
 void main() async {
@@ -68,6 +69,9 @@ class MyApp extends StatelessWidget {
         routes: {
           '/login': (context) => const LoginPage(),
           '/seguros': (context) => const SegurosPage(),
+          '/datos_personales':
+              (context) =>
+                  const DatosPersonalesPage(), // <--- Agrega la ruta aquí
         },
       ),
     );

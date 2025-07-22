@@ -20,7 +20,7 @@ class SegurosForm extends StatelessWidget {
             _buildHeader(context),
             const Expanded(child: _BodyContent()),
             const _PriceSection(),
-            const _ContinueButton(),
+            _ContinueButton(),
           ],
         ),
       ),
@@ -194,15 +194,31 @@ class _PriceSection extends StatelessWidget {
 }
 
 class _ContinueButton extends StatelessWidget {
-  const _ContinueButton();
-
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
       child: ElevatedButton(
-        onPressed:
-            () => context.read<SegurosBloc>().add(const SubmitSeguroEvent()),
+        onPressed: () {
+          final bloc = context.read<SegurosBloc>();
+          final state = bloc.state;
+
+          if (state.selectedPaymentPlan == null ||
+              state.selectedInsuranceType == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Por favor selecciona un plan de pago y un tipo de seguro antes de continuar.',
+                ),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 3),
+              ),
+            );
+            return;
+          }
+
+          Navigator.pushNamed(context, '/datos_personales');
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF1E1E1E),
           foregroundColor: Colors.white,
