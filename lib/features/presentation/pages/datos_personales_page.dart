@@ -1,3 +1,5 @@
+// features/presentation/pages/datos_personales_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/datos_personales/datos_personales_bloc.dart';
@@ -13,6 +15,12 @@ class DatosPersonalesPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.black,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
           title: const Text(
             'Datos personales',
             style: TextStyle(
