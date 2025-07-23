@@ -9,9 +9,6 @@ class DatosPersonalesForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Controladores locales para manejar inputs — para mostrar texto inicial si quieres (opcional)
-    // Pero en BLoC lo más limpio es usar el state para controlar el texto a través de initialValue en TextFormField.
-
     return BlocListener<DatosPersonalesBloc, DatosPersonalesState>(
       listenWhen:
           (previous, current) =>
@@ -36,6 +33,7 @@ class DatosPersonalesForm extends StatelessWidget {
           );
         } else if (state.isSuccess) {
           Navigator.of(context).pop(); // cerrar diálogo loading
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -46,6 +44,9 @@ class DatosPersonalesForm extends StatelessWidget {
               behavior: SnackBarBehavior.floating,
             ),
           );
+
+          // Navegar a la página de condiciones
+          Navigator.of(context).pushReplacementNamed('/condiciones');
         } else if (state.isFailure) {
           Navigator.of(context).pop(); // cerrar diálogo loading si está abierto
           ScaffoldMessenger.of(context).showSnackBar(
