@@ -11,14 +11,14 @@ class CondicionesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => CondicionesBloc()..add(const InitializeCondiciones()),
-
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.black,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
-              Navigator.of(context).pop();
+              // Navegar explícitamente a Datos Personales, reemplazando esta pantalla
+              Navigator.pushReplacementNamed(context, '/datos_personales');
             },
           ),
           title: const Text(
