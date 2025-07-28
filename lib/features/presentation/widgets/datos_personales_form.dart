@@ -45,8 +45,8 @@ class DatosPersonalesForm extends StatelessWidget {
             ),
           );
 
-          // Navegar a la página de condiciones
-          Navigator.of(context).pushReplacementNamed('/condiciones');
+          // MODIFICACIÓN: Navegar a la página de firma
+          Navigator.of(context).pushReplacementNamed('/signature');
         } else if (state.isFailure) {
           Navigator.of(context).pop(); // cerrar diálogo loading si está abierto
           ScaffoldMessenger.of(context).showSnackBar(
@@ -254,7 +254,7 @@ class _EmailField extends StatelessWidget {
 }
 
 class _PhoneField extends StatelessWidget {
-  final List<String> phoneCodes = ['0424', '0414', '0416', '0426'];
+  final List<String> phoneCodes = ['0424', '0414', '0416', '0426', '0412'];
 
   @override
   Widget build(BuildContext context) {

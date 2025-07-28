@@ -14,6 +14,12 @@ import 'features/domain/repositories/seguros_repository.dart';
 import 'features/domain/usecases/submit_seguro_usecase.dart';
 import 'features/presentation/bloc/seguros/seguros_bloc.dart';
 
+// SIGNATURE FEATURE
+import 'features/data/repositories/signature_repository.dart';
+import 'features/domain/repositories/signature_repository_interface.dart';
+import 'features/domain/usecases/signature_use_cases.dart';
+import 'features/presentation/bloc/signature/signature_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -50,6 +56,20 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SubmitSeguroUseCase(sl()));
 
   sl.registerFactory(() => SegurosBloc(sl()));
+
+  // ========================
+  // SIGNATURE FEATURE
+  // ========================
+  // Repository
+  sl.registerLazySingleton<SignatureRepositoryInterface>(
+    () => SignatureRepository(), // Constructor sin parámetros
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => SignatureUseCases(sl()));
+
+  // Bloc
+  sl.registerFactory(() => SignatureBloc(sl()));
 
   // ========================
   // External dependencies
