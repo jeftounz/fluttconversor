@@ -56,7 +56,6 @@ class _ReciboFormState extends State<ReciboForm> {
   Widget _buildReciboUI(ReciboData data, ReciboState state) {
     return Column(
       children: [
-        // Barra de estado eliminada
         _buildHeader(),
         Expanded(
           child: SingleChildScrollView(
@@ -67,12 +66,6 @@ class _ReciboFormState extends State<ReciboForm> {
       ],
     );
   }
-
-  // Métodos eliminados:
-  // _buildStatusBar()
-  // _buildSignalBars()
-  // _buildWiFiIcon()
-  // _buildBattery()
 
   Widget _buildHeader() {
     return Container(
@@ -131,61 +124,35 @@ class _ReciboFormState extends State<ReciboForm> {
 
   Widget _buildVeflatLogo() {
     return Center(
-      child: SizedBox(
-        width: 254,
-        height: 85,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
+      child: Image.asset(
+        'assets/images/peque-veflat.png',
+        width: 200,
+        height: 80,
+        fit: BoxFit.contain,
+        errorBuilder: (
+          BuildContext context,
+          Object error,
+          StackTrace? stackTrace,
+        ) {
+          debugPrint('Error loading image: $error');
+          return Container(
+            width: 200,
+            height: 80,
+            color: Colors.grey[200],
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 4),
-                      ),
-                      child: Center(
-                        child: Container(
-                          width: 16,
-                          height: 16,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'Veflat',
-                  style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                const Icon(Icons.error_outline, color: Colors.red, size: 24),
+                const SizedBox(height: 8),
+                Text(
+                  'No se encontró\npeque-veflat-1.png',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-            const Text(
-              'WEB DEVELOPER & MOBILE',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
