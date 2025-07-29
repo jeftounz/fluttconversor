@@ -30,3 +30,7 @@ class SetInsuranceTypeEvent extends SegurosEvent {
 class SubmitSeguroEvent extends SegurosEvent {
   const SubmitSeguroEvent();
 }
+
+class LoadBcvRateEvent extends SegurosEvent {
+  const LoadBcvRateEvent();
+}

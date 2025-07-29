@@ -23,6 +23,12 @@ import 'features/presentation/bloc/signature/signature_bloc.dart';
 // RECIBO FEATURE - Añadido
 import 'features/presentation/bloc/recibo/recibo_bloc.dart';
 
+// BCV FEATURE - Nuevas dependencias para la tasa BCV
+import 'features/data/datasources/bcv_remote_data_source.dart'; // Nuevo
+import 'features/data/repositories/bcv_repository_impl.dart'; // Nuevo
+import 'features/domain/repositories/bcv_repository.dart'; // Nuevo
+import 'features/domain/usecases/get_bcv_rate_usecase.dart'; // Nuevo
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -58,7 +64,30 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() => SubmitSeguroUseCase(sl()));
 
-  sl.registerFactory(() => SegurosBloc(sl()));
+  // Actualizado: Ahora recibe 3 parámetros
+  sl.registerFactory(
+    () => SegurosBloc(
+      submitUseCase: sl(),
+      getBcvRateUseCase: sl(), // Nuevo caso de uso
+      authBloc: sl(), // Bloc de autenticación
+    ),
+  );
+
+  // ========================
+  // BCV FEATURE - Nueva sección
+  // ========================
+  // Data sources
+  sl.registerLazySingleton<BcvRemoteDataSource>(
+    () => BcvRemoteDataSourceImpl(dio: sl()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<BcvRepository>(
+    () => BcvRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetBcvRateUseCase(sl()));
 
   // ========================
   // SIGNATURE FEATURE
@@ -74,7 +103,7 @@ Future<void> init() async {
   // Bloc
   sl.registerFactory(() => SignatureBloc(sl()));
 
-  // ======================== // Añadido
+  // ========================
   // RECIBO FEATURE
   // ========================
   sl.registerFactory(() => ReciboBloc());
@@ -86,12 +115,18 @@ Future<void> init() async {
     () =>
         Dio()
           ..options = BaseOptions(
-            baseUrl: 'https://api.veflat.com/',
+            baseUrl:
+                'http://104.168.34.22:3002/api/', // Actualizado a tu servidor
             connectTimeout: const Duration(seconds: 15),
             receiveTimeout: const Duration(seconds: 15),
           )
           ..interceptors.add(
-            LogInterceptor(requestBody: true, responseBody: true),
+            LogInterceptor(
+              requestBody: true,
+              responseBody: true,
+              requestHeader: true,
+              responseHeader: true,
+            ),
           ),
   );
 }

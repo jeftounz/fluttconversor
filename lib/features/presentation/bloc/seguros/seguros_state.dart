@@ -16,6 +16,7 @@ class SegurosState extends Equatable {
     this.selectedInsuranceType,
     this.formattedPrice = '\$99.00',
     this.bolivarPrice = 'Bs. 56.28',
+    /*Aqui debe estar el valor asincronico de la tasa "bolivarPrice" */
     /*Es en esta variable que debe estar el bcv */
     this.status = SegurosStatus.initial,
     this.errorMessage,

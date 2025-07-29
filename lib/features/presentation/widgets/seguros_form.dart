@@ -5,8 +5,23 @@ import '../bloc/seguros/seguros_bloc.dart';
 import '../bloc/seguros/seguros_event.dart';
 import '../bloc/seguros/seguros_state.dart';
 
-class SegurosForm extends StatelessWidget {
+class SegurosForm extends StatefulWidget {
   const SegurosForm({super.key});
+
+  @override
+  State<SegurosForm> createState() => _SegurosFormState();
+}
+
+class _SegurosFormState extends State<SegurosForm> {
+  @override
+  void initState() {
+    super.initState();
+    print('SegurosForm: initState - Registrando callback post-frame');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('SegurosForm: Disparando LoadBcvRateEvent');
+      context.read<SegurosBloc>().add(const LoadBcvRateEvent());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -150,6 +165,16 @@ class _PriceSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SegurosBloc, SegurosState>(
       builder: (context, state) {
+        // ===== LOGS DE DEPURACIÓN =====
+        print('=====================================');
+        print('_PriceSection: Reconstruyendo widget');
+        print('Estado actual: ${state.status}');
+        print('bolivarPrice: ${state.bolivarPrice}');
+        print('formattedPrice: ${state.formattedPrice}');
+        print('selectedPaymentPlan: ${state.selectedPaymentPlan?.name}');
+        print('selectedInsuranceType: ${state.selectedInsuranceType?.name}');
+        print('=====================================');
+
         return Container(
           color: const Color(0xFF18191B),
           height: 108,
@@ -196,38 +221,41 @@ class _PriceSection extends StatelessWidget {
 class _ContinueButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: ElevatedButton(
-        onPressed: () {
-          final bloc = context.read<SegurosBloc>();
-          final state = bloc.state;
+    return BlocBuilder<SegurosBloc, SegurosState>(
+      builder: (context, state) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: ElevatedButton(
+            onPressed: () {
+              if (state.selectedPaymentPlan == null ||
+                  state.selectedInsuranceType == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Por favor selecciona un plan de pago y un tipo de seguro antes de continuar.',
+                    ),
+                    backgroundColor: Colors.red,
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+                return;
+              }
 
-          if (state.selectedPaymentPlan == null ||
-              state.selectedInsuranceType == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Por favor selecciona un plan de pago y un tipo de seguro antes de continuar.',
-                ),
-                backgroundColor: Colors.red,
-                duration: Duration(seconds: 3),
+              Navigator.pushNamed(context, '/datos_personales');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1E1E1E),
+              foregroundColor: Colors.white,
+              side: const BorderSide(color: Color(0xFF3C029C)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-            );
-            return;
-          }
-
-          Navigator.pushNamed(context, '/datos_personales');
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF1E1E1E),
-          foregroundColor: Colors.white,
-          side: const BorderSide(color: Color(0xFF3C029C)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          minimumSize: const Size(double.infinity, 48),
-        ),
-        child: const Text('Continuar'),
-      ),
+              minimumSize: const Size(double.infinity, 48),
+            ),
+            child: const Text('Continuar'),
+          ),
+        );
+      },
     );
   }
 }
