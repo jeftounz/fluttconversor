@@ -27,14 +27,24 @@ class SegurosBloc extends Bloc<SegurosEvent, SegurosState> {
   ) async {
     emit(state.copyWith(selectedPaymentPlan: event.plan));
     print('Plan seleccionado: ${event.plan.name}');
+
+    // Recalcular montos si ya tenemos la tasa BCV
+    _recalcularMontos(emit);
   }
 
   Future<void> _onSetInsuranceType(
     SetInsuranceTypeEvent event,
     Emitter<SegurosState> emit,
   ) async {
-    emit(state.copyWith(selectedInsuranceType: event.type));
-    print('Tipo de seguro seleccionado: ${event.type.name}');
+    // Determinar el precio base según el tipo de seguro
+    final precioBase = _getPrecioBase(event.type);
+
+    emit(
+      state.copyWith(selectedInsuranceType: event.type, precioBase: precioBase),
+    );
+
+    // Recalcular el monto en bolívares si ya tenemos la tasa BCV
+    _recalcularMontos(emit);
   }
 
   Future<void> _onSubmitSeguro(
@@ -46,6 +56,8 @@ class SegurosBloc extends Bloc<SegurosEvent, SegurosState> {
       final success = await submitUseCase({
         'paymentPlan': state.selectedPaymentPlan?.name,
         'insuranceType': state.selectedInsuranceType?.name,
+        'precioBase': state.precioBase,
+        'tasaBCV': state.tasaBCV,
       });
       if (success) {
         emit(state.copyWith(status: SegurosStatus.success));
@@ -71,7 +83,6 @@ class SegurosBloc extends Bloc<SegurosEvent, SegurosState> {
     LoadBcvRateEvent event,
     Emitter<SegurosState> emit,
   ) async {
-    // Mantener los valores existentes pero cambiar estado a loading
     emit(state.copyWith(status: SegurosStatus.loading));
     print('Iniciando carga de tasa BCV...');
 
@@ -82,35 +93,56 @@ class SegurosBloc extends Bloc<SegurosEvent, SegurosState> {
       }
 
       print('Obteniendo tasa BCV con token: $token');
-      final rate = await getBcvRateUseCase(token);
-      print('Tasa BCV obtenida: $rate');
+      final tasa = await getBcvRateUseCase(token);
+      print('Tasa BCV obtenida: $tasa');
 
-      // Crear un NUEVO estado con todos los valores actuales + nueva tasa
-      emit(
-        SegurosState(
-          selectedPaymentPlan: state.selectedPaymentPlan,
-          selectedInsuranceType: state.selectedInsuranceType,
-          formattedPrice: state.formattedPrice,
-          bolivarPrice: 'Bs. ${rate.toStringAsFixed(2)}',
-          status: SegurosStatus.success,
-        ),
-      );
+      // Actualizar la tasa BCV y recalcular montos
+      emit(state.copyWith(status: SegurosStatus.success, tasaBCV: tasa));
+
+      // Recalcular montos con la nueva tasa
+      _recalcularMontos(emit);
       print('Estado actualizado con nueva tasa BCV');
     } catch (e) {
       print('Error al cargar tasa BCV: $e');
 
-      // Crear un NUEVO estado de error
       emit(
-        SegurosState(
-          selectedPaymentPlan: state.selectedPaymentPlan,
-          selectedInsuranceType: state.selectedInsuranceType,
-          formattedPrice: state.formattedPrice,
-          bolivarPrice: 'Bs. 0.00',
+        state.copyWith(
           status: SegurosStatus.error,
           errorMessage: 'Error al obtener tasa BCV: ${e.toString()}',
+          // Mantener los valores anteriores pero mostrar error
+          bolivarPrice: 'Bs. 0.00',
         ),
       );
       print('Estado actualizado con error de tasa BCV');
     }
+  }
+
+  // Determinar el precio base según el tipo de seguro
+  double _getPrecioBase(InsuranceType type) {
+    switch (type) {
+      case InsuranceType.vida:
+        return 99.00;
+      case InsuranceType.exequial:
+        return 99.00;
+    }
+  }
+
+  // Método para recalcular los montos en dólares y bolívares
+  void _recalcularMontos(Emitter<SegurosState> emit) {
+    if (state.selectedInsuranceType == null || state.tasaBCV <= 0) {
+      // No hay suficiente información para calcular
+      return;
+    }
+
+    final precioBase = state.precioBase;
+    final tasa = state.tasaBCV;
+    final montoBolivares = precioBase * tasa;
+
+    emit(
+      state.copyWith(
+        formattedPrice: '\$${precioBase.toStringAsFixed(2)}',
+        bolivarPrice: 'Bs. ${montoBolivares.toStringAsFixed(2)}',
+      ),
+    );
   }
 }
