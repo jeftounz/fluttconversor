@@ -9,6 +9,7 @@ part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
+  String? authToken; // Variable para almacenar el token globalmente
 
   AuthBloc({required this.loginUseCase}) : super(const AuthState()) {
     on<LoginSubmitted>(_onLoginSubmitted);
@@ -24,10 +25,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final token = await loginUseCase(event.email, event.password);
       log('Login successful. Token: $token');
+
+      // Guardar el token en el bloc y en el estado
+      authToken = token;
       emit(state.copyWith(status: AuthStatus.authenticated, token: token));
     } catch (e) {
       if (e.toString().contains('connection_error')) {
         if (event.email == 'admin@gmail.com' && event.password == 'password') {
+          // Guardar el token offline
+          authToken = 'offline-token';
           emit(
             state.copyWith(
               status: AuthStatus.authenticated,
@@ -57,6 +63,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     LogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
+    // Limpiar el token al hacer logout
+    authToken = null;
     emit(const AuthState(status: AuthStatus.unauthenticated, token: null));
   }
 

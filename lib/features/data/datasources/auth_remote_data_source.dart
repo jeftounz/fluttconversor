@@ -13,11 +13,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<String> login(String email, String password) async {
     try {
       final response = await dio.post(
-        'auth/login',
+        'http://104.168.34.22:3002/api/auth/login',
         data: {'email': email, 'password': password},
       );
 
-      return response.data['access_token'] as String;
+      // Imprimir mensaje de éxito en la terminal
+      print(response.data['message']);
+
+      // Obtener el token de la respuesta
+      return response.data['data']['token'] as String;
     } catch (_) {
       throw Exception('connection_error');
     }
