@@ -321,6 +321,10 @@ class _SignatureFormState extends State<SignatureForm> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('¡Pago realizado!')),
                         );
+                        // Navegar a la página de recibo después de 1 segundo
+                        Future.delayed(const Duration(seconds: 1), () {
+                          Navigator.pushNamed(context, '/recibo');
+                        });
                       }
                       : null,
               style: ElevatedButton.styleFrom(

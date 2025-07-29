@@ -6,7 +6,8 @@ import 'injection_container.dart' as di;
 import 'features/presentation/pages/login_page.dart';
 import 'features/presentation/pages/seguros_page.dart';
 import 'features/presentation/pages/datos_personales_page.dart';
-import 'features/presentation/pages/signature_page.dart'; // <--- Importar aquí
+import 'features/presentation/pages/signature_page.dart';
+import 'features/presentation/pages/recibo_page.dart'; // Import añadido
 import 'features/presentation/bloc/auth/auth_bloc.dart';
 
 void main() async {
@@ -73,6 +74,7 @@ class MyApp extends StatelessWidget {
           '/seguros': (context) => const SegurosPage(),
           '/datos_personales': (context) => const DatosPersonalesPage(),
           '/signature': (context) => const SignaturePage(),
+          '/recibo': (context) => const ReciboPage(), // Ruta añadida
         },
       ),
     );

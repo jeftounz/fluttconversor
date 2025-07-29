@@ -20,6 +20,9 @@ import 'features/domain/repositories/signature_repository_interface.dart';
 import 'features/domain/usecases/signature_use_cases.dart';
 import 'features/presentation/bloc/signature/signature_bloc.dart';
 
+// RECIBO FEATURE - Añadido
+import 'features/presentation/bloc/recibo/recibo_bloc.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -62,7 +65,7 @@ Future<void> init() async {
   // ========================
   // Repository
   sl.registerLazySingleton<SignatureRepositoryInterface>(
-    () => SignatureRepository(), // Constructor sin parámetros
+    () => SignatureRepository(),
   );
 
   // Use cases
@@ -70,6 +73,11 @@ Future<void> init() async {
 
   // Bloc
   sl.registerFactory(() => SignatureBloc(sl()));
+
+  // ======================== // Añadido
+  // RECIBO FEATURE
+  // ========================
+  sl.registerFactory(() => ReciboBloc());
 
   // ========================
   // External dependencies
