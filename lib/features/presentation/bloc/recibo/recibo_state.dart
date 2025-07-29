@@ -45,6 +45,7 @@ class ReciboData extends Equatable {
   factory ReciboData.defaultData() {
     return const ReciboData(
       cliente: 'Nombre y Apellido',
+      /*Es aqui donde contatenamos el nombre y apellido del cliente en datos_personales_state.dart */
       rif: 'J-123456-9',
       afiliacion: '00000123456789',
       terminal: '1',
@@ -52,7 +53,8 @@ class ReciboData extends Equatable {
       numeroCuenta: '123456*********1771',
       fecha: 'Jueves 28/01/2025',
       hora: '03:50 p. m.',
-      monto: 1084.46,
+      monto: 5571.72,
+      /*Es en esta variable que se multiplica las dos variables de seguros_state.dart */
       estado: 'APROBADO',
       tipoTransaccion: 'Compra',
     );

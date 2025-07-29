@@ -14,8 +14,9 @@ class SegurosState extends Equatable {
   const SegurosState({
     this.selectedPaymentPlan,
     this.selectedInsuranceType,
-    this.formattedPrice = '\$0.00',
-    this.bolivarPrice = 'Bs. 0.00',
+    this.formattedPrice = '\$99.00',
+    this.bolivarPrice = 'Bs. 56.28',
+    /*Es en esta variable que debe estar el bcv */
     this.status = SegurosStatus.initial,
     this.errorMessage,
   });

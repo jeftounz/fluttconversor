@@ -36,6 +36,7 @@ class DatosPersonalesState extends Equatable {
   factory DatosPersonalesState.initial() {
     return const DatosPersonalesState(
       firstName: '',
+      /*AQUI ES DONDE ESTARA EL NOMBRE Y APELLIDO DEL CLIENTE */
       lastName: '',
       email: '',
       phoneCode: '0424',
