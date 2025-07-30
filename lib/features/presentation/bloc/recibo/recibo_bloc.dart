@@ -4,12 +4,13 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'recibo_event.dart';
 import 'recibo_state.dart';
-import 'dart:typed_data'; // Importación añadida para Uint8List
+import 'dart:typed_data';
 
 class ReciboBloc extends Bloc<ReciboEvent, ReciboState> {
   ReciboBloc() : super(ReciboInitial()) {
     on<LoadRecibo>(_onLoadRecibo);
     on<PrintRecibo>(_onPrintRecibo);
+    on<ReciboCompleted>(_onReciboCompleted); // Nuevo manejador de evento
   }
 
   void _onLoadRecibo(LoadRecibo event, Emitter<ReciboState> emit) async {
@@ -32,11 +33,18 @@ class ReciboBloc extends Bloc<ReciboEvent, ReciboState> {
         );
         emit(ReciboPrinted(currentState.reciboData));
         await Future.delayed(const Duration(seconds: 2));
-        emit(ReciboLoaded(currentState.reciboData));
+
+        // Disparar evento para completar el proceso
+        add(const ReciboCompleted());
       } catch (e) {
         emit(ReciboError('Error al imprimir: ${e.toString()}'));
       }
     }
+  }
+
+  // Nuevo manejador para el evento ReciboCompleted
+  void _onReciboCompleted(ReciboCompleted event, Emitter<ReciboState> emit) {
+    emit(const ReciboCompletedState());
   }
 
   Future<void> _generateAndPrintPdf(

@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/recibo/recibo_bloc.dart';
 import '../bloc/recibo/recibo_event.dart';
 import '../bloc/recibo/recibo_state.dart';
-import '../../data/services/local_form_storage_service.dart.dart'; // Import añadido
+import '../../data/services/local_form_storage_service.dart.dart';
+// Importa tu pantalla de login (ajusta la ruta según tu proyecto)
+import '../pages/login_page.dart'; // Ajusta esta importación
 
 class ReciboForm extends StatefulWidget {
   const ReciboForm({super.key});
@@ -44,7 +46,18 @@ class _ReciboFormState extends State<ReciboForm> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ReciboBloc, ReciboState>(
+    return BlocConsumer<ReciboBloc, ReciboState>(
+      listener: (context, state) {
+        // Escuchar cuando el proceso de recibo haya completado
+        if (state is ReciboCompletedState) {
+          // Navegar al login y limpiar toda la pila de navegación
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+            (Route<dynamic> route) => false,
+          );
+        }
+      },
       builder: (context, state) {
         // Mostrar loading mientras se cargan ambos: datos del bloc y datos locales
         if (!datosLocalesCargados || state is ReciboLoading) {

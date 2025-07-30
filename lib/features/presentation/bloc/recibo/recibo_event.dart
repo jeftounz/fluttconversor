@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'dart:typed_data'; // Importación añadida para Uint8List
+import 'dart:typed_data';
 
 abstract class ReciboEvent extends Equatable {
   const ReciboEvent();
@@ -21,4 +21,12 @@ class PrintRecibo extends ReciboEvent {
 
   @override
   List<Object?> get props => [firma, nombre, apellido];
+}
+
+// Nuevo evento para indicar que el proceso ha completado
+class ReciboCompleted extends ReciboEvent {
+  const ReciboCompleted();
+
+  @override
+  List<Object> get props => [];
 }
