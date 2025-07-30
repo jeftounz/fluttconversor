@@ -1,9 +1,9 @@
-// features/presentation/widgets/seguros_form.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/seguros/seguros_bloc.dart';
 import '../bloc/seguros/seguros_event.dart';
 import '../bloc/seguros/seguros_state.dart';
+import '../../data/services/local_form_storage_service.dart.dart';
 
 class SegurosForm extends StatefulWidget {
   const SegurosForm({super.key});
@@ -226,7 +226,7 @@ class _ContinueButton extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(24),
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (state.selectedPaymentPlan == null ||
                   state.selectedInsuranceType == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -240,6 +240,13 @@ class _ContinueButton extends StatelessWidget {
                 );
                 return;
               }
+
+              // 💾 Guardar datos localmente
+              final storage = LocalFormStorageService();
+              await storage.saveSegurosData(
+                plan: state.selectedPaymentPlan!.name,
+                tipo: state.selectedInsuranceType!.name,
+              );
 
               Navigator.pushNamed(context, '/datos_personales');
             },

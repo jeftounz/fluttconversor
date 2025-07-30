@@ -3,9 +3,33 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/datos_personales/datos_personales_bloc.dart';
 import '../bloc/datos_personales/datos_personales_event.dart';
 import '../bloc/datos_personales/datos_personales_state.dart';
+import '../../data/services/local_form_storage_service.dart.dart';
 
-class DatosPersonalesForm extends StatelessWidget {
+class DatosPersonalesForm extends StatefulWidget {
   const DatosPersonalesForm({Key? key}) : super(key: key);
+
+  @override
+  State<DatosPersonalesForm> createState() => _DatosPersonalesFormState();
+}
+
+class _DatosPersonalesFormState extends State<DatosPersonalesForm> {
+  final TextEditingController _nombreController = TextEditingController();
+  final TextEditingController _apellidoController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final state = context.read<DatosPersonalesBloc>().state;
+    _nombreController.text = state.firstName;
+    _apellidoController.text = state.lastName;
+  }
+
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    _apellidoController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +56,7 @@ class DatosPersonalesForm extends StatelessWidget {
                 ),
           );
         } else if (state.isSuccess) {
-          Navigator.of(context).pop(); // cerrar diálogo loading
-
+          Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -44,11 +67,9 @@ class DatosPersonalesForm extends StatelessWidget {
               behavior: SnackBarBehavior.floating,
             ),
           );
-
-          // MODIFICACIÓN: Navegar a la página de firma
           Navigator.of(context).pushReplacementNamed('/signature');
         } else if (state.isFailure) {
-          Navigator.of(context).pop(); // cerrar diálogo loading si está abierto
+          Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -72,15 +93,18 @@ class DatosPersonalesForm extends StatelessWidget {
             children: [
               _buildFormHeader(),
               const SizedBox(height: 32),
-              _FirstNameField(),
+              _FirstNameField(nombreController: _nombreController),
               const SizedBox(height: 24),
-              _LastNameField(),
+              _LastNameField(apellidoController: _apellidoController),
               const SizedBox(height: 24),
               _EmailField(),
               const SizedBox(height: 24),
               _PhoneField(),
               const SizedBox(height: 152),
-              _ContinueButton(),
+              _ContinueButton(
+                nombreController: _nombreController,
+                apellidoController: _apellidoController,
+              ),
             ],
           ),
         ),
@@ -119,6 +143,10 @@ class DatosPersonalesForm extends StatelessWidget {
 }
 
 class _FirstNameField extends StatelessWidget {
+  final TextEditingController nombreController;
+
+  const _FirstNameField({required this.nombreController});
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DatosPersonalesBloc, DatosPersonalesState>(
@@ -127,15 +155,18 @@ class _FirstNameField extends StatelessWidget {
               previous.firstName != current.firstName ||
               previous.isFirstNameValid != current.isFirstNameValid,
       builder: (context, state) {
+        if (nombreController.text != state.firstName) {
+          nombreController.text = state.firstName;
+        }
         return _inputField(
           label: 'Primer nombre',
           initialValue: state.firstName,
           isValid: state.isFirstNameValid,
           errorText: !state.isFirstNameValid ? 'Nombre inválido' : null,
-          onChanged:
-              (value) => context.read<DatosPersonalesBloc>().add(
-                FirstNameChanged(value),
-              ),
+          onChanged: (value) {
+            context.read<DatosPersonalesBloc>().add(FirstNameChanged(value));
+            nombreController.text = value;
+          },
         );
       },
     );
@@ -143,6 +174,10 @@ class _FirstNameField extends StatelessWidget {
 }
 
 class _LastNameField extends StatelessWidget {
+  final TextEditingController apellidoController;
+
+  const _LastNameField({required this.apellidoController});
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DatosPersonalesBloc, DatosPersonalesState>(
@@ -151,15 +186,18 @@ class _LastNameField extends StatelessWidget {
               previous.lastName != current.lastName ||
               previous.isLastNameValid != current.isLastNameValid,
       builder: (context, state) {
+        if (apellidoController.text != state.lastName) {
+          apellidoController.text = state.lastName;
+        }
         return _inputField(
           label: 'Primer apellido',
           initialValue: state.lastName,
           isValid: state.isLastNameValid,
           errorText: !state.isLastNameValid ? 'Apellido inválido' : null,
-          onChanged:
-              (value) => context.read<DatosPersonalesBloc>().add(
-                LastNameChanged(value),
-              ),
+          onChanged: (value) {
+            context.read<DatosPersonalesBloc>().add(LastNameChanged(value));
+            apellidoController.text = value;
+          },
         );
       },
     );
@@ -379,33 +417,56 @@ class _PhoneField extends StatelessWidget {
 }
 
 class _ContinueButton extends StatelessWidget {
+  final TextEditingController nombreController;
+  final TextEditingController apellidoController;
+
+  const _ContinueButton({
+    required this.nombreController,
+    required this.apellidoController,
+  }); // Warning solucionado: key removido
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
+    final state =
+        context.read<DatosPersonalesBloc>().state; // Obtener estado actual
+
+    return Container(
+      padding: const EdgeInsets.all(24),
       child: ElevatedButton(
-        onPressed: () {
-          context.read<DatosPersonalesBloc>().add(const SubmitForm());
+        onPressed: () async {
+          if (nombreController.text.isEmpty ||
+              apellidoController.text.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Por favor completa tu nombre y apellido antes de continuar.',
+                ),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 3),
+              ),
+            );
+            return;
+          }
+
+          final storage = LocalFormStorageService();
+          await storage.saveDatosPersonales(
+            nombre: nombreController.text,
+            apellido: apellidoController.text,
+            telefono:
+                '${state.phoneCode}${state.phoneNumber}', // Parámetro añadido
+            correo: state.email, // Parámetro añadido
+          );
+
+          Navigator.pushNamed(context, '/signature');
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF1E1E1E),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: const BorderSide(color: Color(0xFF3C029C)),
-          ),
-          elevation: 0,
-          shadowColor: Colors.black.withOpacity(0.05),
+          foregroundColor: Colors.white,
+          side: const BorderSide(color: Color(0xFF3C029C)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          minimumSize: const Size(double.infinity, 48),
         ),
-        child: const Text(
-          'Continuar',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Ubuntu',
-          ),
-        ),
+        child: const Text('Continuar'),
       ),
     );
   }
