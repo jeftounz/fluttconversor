@@ -321,7 +321,9 @@ class _ReciboFormState extends State<ReciboForm> {
         onPressed:
             isPrinting
                 ? null
-                : () => context.read<ReciboBloc>().add(const PrintRecibo()),
+                : () => context.read<ReciboBloc>().add(
+                  PrintRecibo(firma: firma, nombre: nombre, apellido: apellido),
+                ),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,

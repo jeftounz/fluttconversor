@@ -1,9 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:printing/printing.dart'; /*Tengo este erro:*/
+import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'recibo_event.dart';
 import 'recibo_state.dart';
+import 'dart:typed_data'; // Importación añadida para Uint8List
 
 class ReciboBloc extends Bloc<ReciboEvent, ReciboState> {
   ReciboBloc() : super(ReciboInitial()) {
@@ -23,7 +24,12 @@ class ReciboBloc extends Bloc<ReciboEvent, ReciboState> {
       emit(ReciboPrinting(currentState.reciboData));
 
       try {
-        await _generateAndPrintPdf(currentState.reciboData);
+        await _generateAndPrintPdf(
+          currentState.reciboData,
+          event.firma,
+          event.nombre,
+          event.apellido,
+        );
         emit(ReciboPrinted(currentState.reciboData));
         await Future.delayed(const Duration(seconds: 2));
         emit(ReciboLoaded(currentState.reciboData));
@@ -33,7 +39,12 @@ class ReciboBloc extends Bloc<ReciboEvent, ReciboState> {
     }
   }
 
-  Future<void> _generateAndPrintPdf(ReciboData data) async {
+  Future<void> _generateAndPrintPdf(
+    ReciboData data,
+    Uint8List? firma,
+    String? nombre,
+    String? apellido,
+  ) async {
     final pdf = pw.Document();
 
     pdf.addPage(
@@ -67,7 +78,10 @@ class ReciboBloc extends Bloc<ReciboEvent, ReciboState> {
                 ),
               ),
               pw.SizedBox(height: 20),
-              pw.Text('Cliente: ${data.cliente}'),
+              // Usar nombre y apellido proporcionados
+              pw.Text(
+                'Cliente: ${nombre ?? "No disponible"} ${apellido ?? ""}',
+              ),
               pw.Text('RIF: ${data.rif}'),
               pw.Text('Afil: ${data.afiliacion}'),
               pw.Text('Term: ${data.terminal} Aprob: ${data.aprobacion}'),
@@ -92,7 +106,11 @@ class ReciboBloc extends Bloc<ReciboEvent, ReciboState> {
               ),
               pw.SizedBox(height: 40),
               pw.Text('FIRMA DEL CLIENTE'),
-              pw.SizedBox(height: 40),
+              pw.SizedBox(height: 20),
+              // Mostrar la firma si existe
+              if (firma != null)
+                pw.Image(pw.MemoryImage(firma), width: 200, height: 80),
+              pw.SizedBox(height: 20),
               pw.Divider(),
               pw.SizedBox(height: 20),
               pw.Center(
