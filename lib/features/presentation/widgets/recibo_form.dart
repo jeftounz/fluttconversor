@@ -1,8 +1,13 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/recibo/recibo_bloc.dart';
 import '../bloc/recibo/recibo_event.dart';
 import '../bloc/recibo/recibo_state.dart';
+import '../../data/services/local_form_storage_service.dart.dart';
+// Importa tu pantalla de login (ajusta la ruta según tu proyecto)
+import '../pages/login_page.dart'; // Ajusta esta importación
 
 class ReciboForm extends StatefulWidget {
   const ReciboForm({super.key});
@@ -12,17 +17,50 @@ class ReciboForm extends StatefulWidget {
 }
 
 class _ReciboFormState extends State<ReciboForm> {
+  String? nombre;
+  String? apellido;
+  Uint8List? firma;
+  bool datosLocalesCargados = false;
+
   @override
   void initState() {
     super.initState();
     context.read<ReciboBloc>().add(const LoadRecibo());
+    _cargarDatosLocales();
+  }
+
+  Future<void> _cargarDatosLocales() async {
+    final storage = LocalFormStorageService();
+    final datos = await storage.getAllData();
+
+    setState(() {
+      nombre = datos['nombre'];
+      apellido = datos['apellido'];
+      final firmaBase64 = datos['firma'];
+      if (firmaBase64 != null) {
+        firma = base64Decode(firmaBase64);
+      }
+      datosLocalesCargados = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ReciboBloc, ReciboState>(
+    return BlocConsumer<ReciboBloc, ReciboState>(
+      listener: (context, state) {
+        // Escuchar cuando el proceso de recibo haya completado
+        if (state is ReciboCompletedState) {
+          // Navegar al login y limpiar toda la pila de navegación
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+            (Route<dynamic> route) => false,
+          );
+        }
+      },
       builder: (context, state) {
-        if (state is ReciboLoading) {
+        // Mostrar loading mientras se cargan ambos: datos del bloc y datos locales
+        if (!datosLocalesCargados || state is ReciboLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -35,35 +73,31 @@ class _ReciboFormState extends State<ReciboForm> {
           );
         }
 
-        if (state is ReciboLoaded ||
-            state is ReciboPrinting ||
-            state is ReciboPrinted) {
-          final reciboData =
-              state is ReciboLoaded
-                  ? state.reciboData
-                  : state is ReciboPrinting
-                  ? state.reciboData
-                  : (state as ReciboPrinted).reciboData;
+        final reciboData =
+            state is ReciboLoaded
+                ? state.reciboData
+                : state is ReciboPrinting
+                ? state.reciboData
+                : (state as ReciboPrinted).reciboData;
 
-          return _buildReciboUI(reciboData, state);
-        }
-
-        return const Center(child: CircularProgressIndicator());
+        return _buildReciboUI(reciboData, state);
       },
     );
   }
 
   Widget _buildReciboUI(ReciboData data, ReciboState state) {
-    return Column(
-      children: [
-        _buildHeader(),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: _buildReceiptContainer(data, state),
+    return Scaffold(
+      body: Column(
+        children: [
+          _buildHeader(),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: _buildReceiptContainer(data, state),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -161,7 +195,10 @@ class _ReciboFormState extends State<ReciboForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInfoLine('Cliente: ${data.cliente}'),
+        // Mostrar nombre y apellido cargados localmente
+        _buildInfoLine(
+          'Cliente: ${nombre ?? "No disponible"} ${apellido ?? ""}',
+        ),
         const SizedBox(height: 16),
         _buildInfoLine('RIF: ${data.rif}'),
         const SizedBox(height: 16),
@@ -241,7 +278,16 @@ class _ReciboFormState extends State<ReciboForm> {
         const SizedBox(height: 16),
         const Text('FIRMA DEL CLIENTE', style: TextStyle(fontSize: 14)),
         const SizedBox(height: 32),
-        Container(height: 94, child: CustomPaint(painter: SignaturePainter())),
+
+        // Mostrar la firma guardada
+        firma != null
+            ? Image.memory(firma!, height: 94, fit: BoxFit.contain)
+            : Container(
+              height: 94,
+              color: Colors.grey[200],
+              child: const Center(child: Text('Firma no disponible')),
+            ),
+
         const SizedBox(height: 16),
         Container(height: 2, color: const Color(0xFF212121)),
         const SizedBox(height: 32),
@@ -288,7 +334,9 @@ class _ReciboFormState extends State<ReciboForm> {
         onPressed:
             isPrinting
                 ? null
-                : () => context.read<ReciboBloc>().add(const PrintRecibo()),
+                : () => context.read<ReciboBloc>().add(
+                  PrintRecibo(firma: firma, nombre: nombre, apellido: apellido),
+                ),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,

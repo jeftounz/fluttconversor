@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/signature/signature_bloc.dart';
 import 'signature_modal.dart';
+import '../../data/services/local_form_storage_service.dart.dart'; // Import corregido
 
 class SignatureForm extends StatefulWidget {
   const SignatureForm({super.key});
@@ -317,14 +318,29 @@ class _SignatureFormState extends State<SignatureForm> {
             child: ElevatedButton(
               onPressed:
                   canPay
-                      ? () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('¡Pago realizado!')),
-                        );
-                        // Navegar a la página de recibo después de 1 segundo
-                        Future.delayed(const Duration(seconds: 1), () {
-                          Navigator.pushNamed(context, '/recibo');
-                        });
+                      ? () async {
+                        // Obtener los bytes de la firma
+                        if (signatureState is! SignatureReady ||
+                            signatureState.signatureData == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Por favor dibuja tu firma antes de continuar.',
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+
+                        final signatureBytes = signatureState.signatureData!;
+
+                        // Guardar la firma
+                        final storage = LocalFormStorageService();
+                        await storage.saveFirma(signatureBytes);
+
+                        // Navegar a la página de resumen
+                        Navigator.pushNamed(context, '/recibo');
                       }
                       : null,
               style: ElevatedButton.styleFrom(
