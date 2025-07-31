@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/seguros/seguros_bloc.dart';
 import '../widgets/seguros_form.dart';
 import '../../../../injection_container.dart';
-import '../bloc/auth/auth_bloc.dart'; // Nuevo import
+import '../bloc/auth/auth_bloc.dart';
 
 class SegurosPage extends StatelessWidget {
   const SegurosPage({super.key});

@@ -94,7 +94,6 @@ class DatosPersonalesBloc
     SubmitForm event,
     Emitter<DatosPersonalesState> emit,
   ) async {
-    // Validar todos los campos
     final errors = <String>[];
 
     final isFirstNameValid = _validateName(state.firstName);
@@ -179,8 +178,6 @@ class DatosPersonalesBloc
       );
     }
   }
-
-  // Validaciones privadas
 
   bool _validateName(String value) {
     if (value.trim().isEmpty) return false;

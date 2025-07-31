@@ -127,7 +127,6 @@ class SegurosBloc extends Bloc<SegurosEvent, SegurosState> {
     }
   }
 
-  // 🔽🔽🔽 MÉTODO MODIFICADO (solo cambia esta sección) 🔽🔽🔽
   void _recalcularMontos(Emitter<SegurosState> emit) {
     if (state.selectedInsuranceType == null || state.tasaBCV <= 0) {
       return;

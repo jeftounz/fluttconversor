@@ -20,14 +20,14 @@ import 'features/domain/repositories/signature_repository_interface.dart';
 import 'features/domain/usecases/signature_use_cases.dart';
 import 'features/presentation/bloc/signature/signature_bloc.dart';
 
-// RECIBO FEATURE - Añadido
+// RECIBO FEATURE
 import 'features/presentation/bloc/recibo/recibo_bloc.dart';
 
-// BCV FEATURE - Nuevas dependencias para la tasa BCV
-import 'features/data/datasources/bcv_remote_data_source.dart'; // Nuevo
-import 'features/data/repositories/bcv_repository_impl.dart'; // Nuevo
-import 'features/domain/repositories/bcv_repository.dart'; // Nuevo
-import 'features/domain/usecases/get_bcv_rate_usecase.dart'; // Nuevo
+// BCV FEATURE
+import 'features/data/datasources/bcv_remote_data_source.dart';
+import 'features/data/repositories/bcv_repository_impl.dart';
+import 'features/domain/repositories/bcv_repository.dart';
+import 'features/domain/usecases/get_bcv_rate_usecase.dart';
 
 final sl = GetIt.instance;
 
@@ -64,12 +64,11 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() => SubmitSeguroUseCase(sl()));
 
-  // Actualizado: Ahora recibe 3 parámetros
   sl.registerFactory(
     () => SegurosBloc(
       submitUseCase: sl(),
-      getBcvRateUseCase: sl(), // Nuevo caso de uso
-      authBloc: sl(), // Bloc de autenticación
+      getBcvRateUseCase: sl(),
+      authBloc: sl(),
     ),
   );
 
@@ -115,8 +114,7 @@ Future<void> init() async {
     () =>
         Dio()
           ..options = BaseOptions(
-            baseUrl:
-                'http://104.168.34.22:3002/api/', // Actualizado a tu servidor
+            baseUrl: 'http://104.168.34.22:3002/api/',
             connectTimeout: const Duration(seconds: 15),
             receiveTimeout: const Duration(seconds: 15),
           )

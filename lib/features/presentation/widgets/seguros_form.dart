@@ -165,17 +165,6 @@ class _PriceSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SegurosBloc, SegurosState>(
       builder: (context, state) {
-        // ===== LOGS DE DEPURACIÓN =====
-        print('=====================================');
-        print('_PriceSection: Reconstruyendo widget');
-        print('Estado actual: ${state.status}');
-        print('bolivarPrice: ${state.bolivarPrice}');
-        print('formattedPrice: ${state.formattedPrice}');
-        print('selectedPaymentPlan: ${state.selectedPaymentPlan?.name}');
-        print('selectedInsuranceType: ${state.selectedInsuranceType?.name}');
-        print('tasaBCV: ${state.tasaBCV}'); // Nuevo log
-        print('=====================================');
-
         return Container(
           color: const Color(0xFF18191B),
           padding: const EdgeInsets.all(16),
@@ -246,7 +235,6 @@ class _ContinueButton extends StatelessWidget {
                 return;
               }
 
-              // 💾 Guardar datos localmente
               final storage = LocalFormStorageService();
               await storage.saveSegurosData(
                 plan: state.selectedPaymentPlan!.name,
