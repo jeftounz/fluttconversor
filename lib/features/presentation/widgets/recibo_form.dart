@@ -92,21 +92,30 @@ class _ReciboFormState extends State<ReciboForm> {
     bool isSmallScreen,
   ) {
     return Scaffold(
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(16 * scaleFactor),
-              child: _buildReceiptContainer(
-                data,
-                state,
-                scaleFactor,
-                isSmallScreen,
-              ),
-            ),
+      body: Center(
+        // 👈 Envuelve todo en un Center
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: 600, // 👈 Ancho máximo para pantallas grandes
           ),
-        ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // 👈 Evita que ocupe todo el alto
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(16 * scaleFactor),
+                  child: _buildReceiptContainer(
+                    data,
+                    state,
+                    scaleFactor,
+                    isSmallScreen,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -134,41 +143,56 @@ class _ReciboFormState extends State<ReciboForm> {
     double scaleFactor,
     bool isSmallScreen,
   ) {
-    return Container(
-      margin: EdgeInsets.all(3 * scaleFactor),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 4,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(16 * scaleFactor),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildVeflatLogo(scaleFactor),
-            SizedBox(height: 20 * scaleFactor),
-            Text(
-              'Recibo de compra MASTERCARD',
-              style: TextStyle(
-                fontSize: 20 * scaleFactor,
-                fontWeight: FontWeight.w400,
-              ),
+    return Center(
+      // 👈 Centramos el contenido del recibo
+      child: Container(
+        margin: EdgeInsets.all(3 * scaleFactor),
+        constraints: BoxConstraints(
+          maxWidth: 500, // 👈 Ancho máximo del recibo
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 4,
+              offset: const Offset(0, 4),
             ),
-            SizedBox(height: 32 * scaleFactor),
-            _buildCustomerInfo(data, scaleFactor),
-            SizedBox(height: 32 * scaleFactor),
-            _buildAmountSection(data, scaleFactor),
-            SizedBox(height: 32 * scaleFactor),
-            _buildSignatureSection(scaleFactor),
-            SizedBox(height: 16 * scaleFactor),
-            _buildPrintButton(state, scaleFactor),
           ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(16 * scaleFactor),
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // 👈 Importante para centrar
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildVeflatLogo(scaleFactor),
+              SizedBox(height: 20 * scaleFactor),
+              Text(
+                'Recibo de compra MASTERCARD',
+                style: TextStyle(
+                  fontSize: 20 * scaleFactor,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              SizedBox(height: 32 * scaleFactor),
+              _buildCustomerInfo(data, scaleFactor),
+              SizedBox(height: 32 * scaleFactor),
+              Center(
+                // 👈 Centramos específicamente el cuadro de monto
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: 300 * scaleFactor, // 👈 Ancho máximo del cuadro
+                  ),
+                  child: _buildAmountSection(data, scaleFactor),
+                ),
+              ),
+              SizedBox(height: 32 * scaleFactor),
+              _buildSignatureSection(scaleFactor),
+              SizedBox(height: 16 * scaleFactor),
+              _buildPrintButton(state, scaleFactor),
+            ],
+          ),
         ),
       ),
     );
