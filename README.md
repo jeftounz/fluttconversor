@@ -1,6 +1,5 @@
 # vflatapp
 
-.
 # 📱 Seguros App - Flutter
 Aplicación móvil para cotización y contratación de seguros con integración de tasas BCV y firma digital.
 
@@ -45,10 +44,8 @@ Ejecuta la aplicación:
 
 bash
 flutter run  
-# 📸 Demostración
-(Incluir capturas de pantalla de las principales pantallas aquí)
 
 env
 API_BASE_URL=http://tu-api.com  
 BCV_ENDPOINT=/api/tasa  
-📄 Licencia
+

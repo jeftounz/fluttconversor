@@ -33,6 +33,9 @@ class _DatosPersonalesFormState extends State<DatosPersonalesForm> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 600;
+
     return BlocListener<DatosPersonalesBloc, DatosPersonalesState>(
       listenWhen:
           (previous, current) =>
@@ -85,53 +88,67 @@ class _DatosPersonalesFormState extends State<DatosPersonalesForm> {
         }
       },
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 384),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildFormHeader(),
-              const SizedBox(height: 32),
-              _FirstNameField(nombreController: _nombreController),
-              const SizedBox(height: 24),
-              _LastNameField(apellidoController: _apellidoController),
-              const SizedBox(height: 24),
-              _EmailField(),
-              const SizedBox(height: 24),
-              _PhoneField(),
-              const SizedBox(height: 152),
-              _ContinueButton(
-                nombreController: _nombreController,
-                apellidoController: _apellidoController,
-              ),
-            ],
+        padding: EdgeInsets.symmetric(
+          horizontal: isSmallScreen ? 16 : 24,
+          vertical: 32,
+        ),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isSmallScreen ? double.infinity : 384,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildFormHeader(isSmallScreen),
+                SizedBox(height: isSmallScreen ? 24 : 32),
+                _FirstNameField(
+                  nombreController: _nombreController,
+                  isSmallScreen: isSmallScreen,
+                ),
+                SizedBox(height: isSmallScreen ? 16 : 24),
+                _LastNameField(
+                  apellidoController: _apellidoController,
+                  isSmallScreen: isSmallScreen,
+                ),
+                SizedBox(height: isSmallScreen ? 16 : 24),
+                _EmailField(isSmallScreen: isSmallScreen),
+                SizedBox(height: isSmallScreen ? 16 : 24),
+                _PhoneField(isSmallScreen: isSmallScreen),
+                SizedBox(height: isSmallScreen ? 80 : 152),
+                _ContinueButton(
+                  nombreController: _nombreController,
+                  apellidoController: _apellidoController,
+                  isSmallScreen: isSmallScreen,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFormHeader() {
+  Widget _buildFormHeader(bool isSmallScreen) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         Text(
           'Introduce tus datos personales',
           style: TextStyle(
-            color: Color(0xFF344054),
-            fontSize: 20,
+            color: const Color(0xFF344054),
+            fontSize: isSmallScreen ? 18 : 20,
             fontWeight: FontWeight.w500,
             height: 1.5,
             fontFamily: 'Ubuntu',
           ),
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Text(
           'Usaremos tu correo para enviarte el código para emitir tu póliza',
           style: TextStyle(
-            color: Color(0xFF475467),
-            fontSize: 14,
+            color: const Color(0xFF475467),
+            fontSize: isSmallScreen ? 12 : 14,
             fontWeight: FontWeight.w400,
             height: 1.43,
             fontFamily: 'Ubuntu',
@@ -144,8 +161,12 @@ class _DatosPersonalesFormState extends State<DatosPersonalesForm> {
 
 class _FirstNameField extends StatelessWidget {
   final TextEditingController nombreController;
+  final bool isSmallScreen;
 
-  const _FirstNameField({required this.nombreController});
+  const _FirstNameField({
+    required this.nombreController,
+    required this.isSmallScreen,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +188,7 @@ class _FirstNameField extends StatelessWidget {
             context.read<DatosPersonalesBloc>().add(FirstNameChanged(value));
             nombreController.text = value;
           },
+          isSmallScreen: isSmallScreen,
         );
       },
     );
@@ -175,8 +197,12 @@ class _FirstNameField extends StatelessWidget {
 
 class _LastNameField extends StatelessWidget {
   final TextEditingController apellidoController;
+  final bool isSmallScreen;
 
-  const _LastNameField({required this.apellidoController});
+  const _LastNameField({
+    required this.apellidoController,
+    required this.isSmallScreen,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -198,6 +224,7 @@ class _LastNameField extends StatelessWidget {
             context.read<DatosPersonalesBloc>().add(LastNameChanged(value));
             apellidoController.text = value;
           },
+          isSmallScreen: isSmallScreen,
         );
       },
     );
@@ -205,6 +232,10 @@ class _LastNameField extends StatelessWidget {
 }
 
 class _EmailField extends StatelessWidget {
+  final bool isSmallScreen;
+
+  const _EmailField({required this.isSmallScreen});
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DatosPersonalesBloc, DatosPersonalesState>(
@@ -216,11 +247,11 @@ class _EmailField extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Correo electrónico',
               style: TextStyle(
-                color: Color(0xFF344054),
-                fontSize: 14,
+                color: const Color(0xFF344054),
+                fontSize: isSmallScreen ? 12 : 14,
                 fontWeight: FontWeight.w500,
                 height: 1.43,
                 fontFamily: 'Ubuntu',
@@ -228,7 +259,7 @@ class _EmailField extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Container(
-              height: 44,
+              height: isSmallScreen ? 40 : 44,
               decoration: BoxDecoration(
                 border: Border.all(
                   color:
@@ -246,36 +277,40 @@ class _EmailField extends StatelessWidget {
               ),
               child: TextField(
                 keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(
-                  color: Color(0xFF344054),
-                  fontSize: 16,
+                style: TextStyle(
+                  color: const Color(0xFF344054),
+                  fontSize: isSmallScreen ? 14 : 16,
                   fontWeight: FontWeight.w400,
                   fontFamily: 'Ubuntu',
                 ),
                 decoration: InputDecoration(
                   hintText: 'Ingresa tu correo electrónico',
-                  hintStyle: const TextStyle(
-                    color: Color(0xFF667085),
-                    fontSize: 16,
+                  hintStyle: TextStyle(
+                    color: const Color(0xFF667085),
+                    fontSize: isSmallScreen ? 14 : 16,
                     fontWeight: FontWeight.w400,
                     fontFamily: 'Ubuntu',
                   ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.only(
-                    left: 46,
+                  contentPadding: EdgeInsets.only(
+                    left: isSmallScreen ? 14 : 46,
                     right: 14,
                     top: 10,
                     bottom: 10,
                   ),
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 14, right: 8),
-                    child: Icon(
-                      Icons.mail_outline,
-                      color: Color(0xFF667085),
-                      size: 20,
-                    ),
-                  ),
-                  prefixIconConstraints: const BoxConstraints(minWidth: 46),
+                  prefixIcon:
+                      isSmallScreen
+                          ? null
+                          : const Padding(
+                            padding: EdgeInsets.only(left: 14, right: 8),
+                            child: Icon(
+                              Icons.mail_outline,
+                              color: Color(0xFF667085),
+                              size: 20,
+                            ),
+                          ),
+                  prefixIconConstraints:
+                      isSmallScreen ? null : const BoxConstraints(minWidth: 46),
                   errorText: !state.isEmailValid ? 'Correo inválido' : null,
                 ),
                 onChanged:
@@ -292,7 +327,16 @@ class _EmailField extends StatelessWidget {
 }
 
 class _PhoneField extends StatelessWidget {
-  final List<String> phoneCodes = ['0424', '0414', '0416', '0426', '0412'];
+  final bool isSmallScreen;
+  final List<String> phoneCodes = const [
+    '0424',
+    '0414',
+    '0416',
+    '0426',
+    '0412',
+  ];
+
+  const _PhoneField({required this.isSmallScreen});
 
   @override
   Widget build(BuildContext context) {
@@ -306,11 +350,11 @@ class _PhoneField extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Número de teléfono',
               style: TextStyle(
-                color: Color(0xFF344054),
-                fontSize: 14,
+                color: const Color(0xFF344054),
+                fontSize: isSmallScreen ? 12 : 14,
                 fontWeight: FontWeight.w500,
                 height: 1.43,
                 fontFamily: 'Ubuntu',
@@ -318,7 +362,7 @@ class _PhoneField extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Container(
-              height: 44,
+              height: isSmallScreen ? 40 : 44,
               decoration: BoxDecoration(
                 border: Border.all(
                   color:
@@ -349,9 +393,9 @@ class _PhoneField extends StatelessWidget {
                                 value: code,
                                 child: Text(
                                   code,
-                                  style: const TextStyle(
-                                    color: Color(0xFF344054),
-                                    fontSize: 16,
+                                  style: TextStyle(
+                                    color: const Color(0xFF344054),
+                                    fontSize: isSmallScreen ? 14 : 16,
                                     fontWeight: FontWeight.w400,
                                     fontFamily: 'Ubuntu',
                                   ),
@@ -376,17 +420,17 @@ class _PhoneField extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       keyboardType: TextInputType.phone,
-                      style: const TextStyle(
-                        color: Color(0xFF344054),
-                        fontSize: 16,
+                      style: TextStyle(
+                        color: const Color(0xFF344054),
+                        fontSize: isSmallScreen ? 14 : 16,
                         fontWeight: FontWeight.w400,
                         fontFamily: 'Ubuntu',
                       ),
                       decoration: InputDecoration(
                         hintText: '000-0000',
-                        hintStyle: const TextStyle(
-                          color: Color(0xFF667085),
-                          fontSize: 16,
+                        hintStyle: TextStyle(
+                          color: const Color(0xFF667085),
+                          fontSize: isSmallScreen ? 14 : 16,
                           fontWeight: FontWeight.w400,
                           fontFamily: 'Ubuntu',
                         ),
@@ -419,19 +463,20 @@ class _PhoneField extends StatelessWidget {
 class _ContinueButton extends StatelessWidget {
   final TextEditingController nombreController;
   final TextEditingController apellidoController;
+  final bool isSmallScreen;
 
   const _ContinueButton({
     required this.nombreController,
     required this.apellidoController,
-  }); // Warning solucionado: key removido
+    required this.isSmallScreen,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final state =
-        context.read<DatosPersonalesBloc>().state; // Obtener estado actual
+    final state = context.read<DatosPersonalesBloc>().state;
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isSmallScreen ? 16 : 24),
       child: ElevatedButton(
         onPressed: () async {
           if (nombreController.text.isEmpty ||
@@ -452,9 +497,8 @@ class _ContinueButton extends StatelessWidget {
           await storage.saveDatosPersonales(
             nombre: nombreController.text,
             apellido: apellidoController.text,
-            telefono:
-                '${state.phoneCode}${state.phoneNumber}', // Parámetro añadido
-            correo: state.email, // Parámetro añadido
+            telefono: '${state.phoneCode}${state.phoneNumber}',
+            correo: state.email,
           );
 
           Navigator.pushNamed(context, '/signature');
@@ -464,9 +508,12 @@ class _ContinueButton extends StatelessWidget {
           foregroundColor: Colors.white,
           side: const BorderSide(color: Color(0xFF3C029C)),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          minimumSize: const Size(double.infinity, 48),
+          minimumSize: Size(double.infinity, isSmallScreen ? 44 : 48),
         ),
-        child: const Text('Continuar'),
+        child: Text(
+          'Continuar',
+          style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
+        ),
       ),
     );
   }
@@ -478,15 +525,16 @@ Widget _inputField({
   required bool isValid,
   String? errorText,
   required ValueChanged<String> onChanged,
+  required bool isSmallScreen,
 }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
         label,
-        style: const TextStyle(
-          color: Color(0xFF344054),
-          fontSize: 14,
+        style: TextStyle(
+          color: const Color(0xFF344054),
+          fontSize: isSmallScreen ? 12 : 14,
           fontWeight: FontWeight.w500,
           height: 1.43,
           fontFamily: 'Ubuntu',
@@ -494,7 +542,7 @@ Widget _inputField({
       ),
       const SizedBox(height: 6),
       Container(
-        height: 44,
+        height: isSmallScreen ? 40 : 44,
         decoration: BoxDecoration(
           border: Border.all(
             color: isValid ? const Color(0xFFD0D5DD) : Colors.red,
@@ -520,9 +568,9 @@ Widget _inputField({
             ),
             errorText: errorText,
           ),
-          style: const TextStyle(
-            color: Color(0xFF344054),
-            fontSize: 16,
+          style: TextStyle(
+            color: const Color(0xFF344054),
+            fontSize: isSmallScreen ? 14 : 16,
             fontWeight: FontWeight.w400,
             fontFamily: 'Ubuntu',
           ),
