@@ -44,8 +44,3 @@ Ejecuta la aplicación:
 
 bash
 flutter run  
-
-env
-API_BASE_URL=http://tu-api.com  
-BCV_ENDPOINT=/api/tasa  
-
