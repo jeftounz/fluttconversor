@@ -6,8 +6,7 @@ import '../bloc/recibo/recibo_bloc.dart';
 import '../bloc/recibo/recibo_event.dart';
 import '../bloc/recibo/recibo_state.dart';
 import '../../data/services/local_form_storage_service.dart.dart';
-// Importa tu pantalla de login (ajusta la ruta según tu proyecto)
-import '../pages/login_page.dart'; // Ajusta esta importación
+import '../pages/login_page.dart';
 
 class ReciboForm extends StatefulWidget {
   const ReciboForm({super.key});
@@ -46,20 +45,21 @@ class _ReciboFormState extends State<ReciboForm> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final scaleFactor = screenWidth < 600 ? screenWidth / 600 : 1.0;
+    final isSmallScreen = screenWidth < 600;
+
     return BlocConsumer<ReciboBloc, ReciboState>(
       listener: (context, state) {
-        // Escuchar cuando el proceso de recibo haya completado
         if (state is ReciboCompletedState) {
-          // Navegar al login y limpiar toda la pila de navegación
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => LoginPage()),
+            MaterialPageRoute(builder: (context) => const LoginPage()),
             (Route<dynamic> route) => false,
           );
         }
       },
       builder: (context, state) {
-        // Mostrar loading mientras se cargan ambos: datos del bloc y datos locales
         if (!datosLocalesCargados || state is ReciboLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -80,20 +80,30 @@ class _ReciboFormState extends State<ReciboForm> {
                 ? state.reciboData
                 : (state as ReciboPrinted).reciboData;
 
-        return _buildReciboUI(reciboData, state);
+        return _buildReciboUI(reciboData, state, scaleFactor, isSmallScreen);
       },
     );
   }
 
-  Widget _buildReciboUI(ReciboData data, ReciboState state) {
+  Widget _buildReciboUI(
+    ReciboData data,
+    ReciboState state,
+    double scaleFactor,
+    bool isSmallScreen,
+  ) {
     return Scaffold(
       body: Column(
         children: [
           _buildHeader(),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: _buildReceiptContainer(data, state),
+              padding: EdgeInsets.all(16 * scaleFactor),
+              child: _buildReceiptContainer(
+                data,
+                state,
+                scaleFactor,
+                isSmallScreen,
+              ),
             ),
           ),
         ],
@@ -118,9 +128,14 @@ class _ReciboFormState extends State<ReciboForm> {
     );
   }
 
-  Widget _buildReceiptContainer(ReciboData data, ReciboState state) {
+  Widget _buildReceiptContainer(
+    ReciboData data,
+    ReciboState state,
+    double scaleFactor,
+    bool isSmallScreen,
+  ) {
     return Container(
-      margin: const EdgeInsets.all(3),
+      margin: EdgeInsets.all(3 * scaleFactor),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -132,36 +147,39 @@ class _ReciboFormState extends State<ReciboForm> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16 * scaleFactor),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildVeflatLogo(),
-            const SizedBox(height: 20),
-            const Text(
+            _buildVeflatLogo(scaleFactor),
+            SizedBox(height: 20 * scaleFactor),
+            Text(
               'Recibo de compra MASTERCARD',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+              style: TextStyle(
+                fontSize: 20 * scaleFactor,
+                fontWeight: FontWeight.w400,
+              ),
             ),
-            const SizedBox(height: 32),
-            _buildCustomerInfo(data),
-            const SizedBox(height: 32),
-            _buildAmountSection(data),
-            const SizedBox(height: 32),
-            _buildSignatureSection(),
-            const SizedBox(height: 16),
-            _buildPrintButton(state),
+            SizedBox(height: 32 * scaleFactor),
+            _buildCustomerInfo(data, scaleFactor),
+            SizedBox(height: 32 * scaleFactor),
+            _buildAmountSection(data, scaleFactor),
+            SizedBox(height: 32 * scaleFactor),
+            _buildSignatureSection(scaleFactor),
+            SizedBox(height: 16 * scaleFactor),
+            _buildPrintButton(state, scaleFactor),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildVeflatLogo() {
+  Widget _buildVeflatLogo(double scaleFactor) {
     return Center(
       child: Image.asset(
         'assets/images/peque-veflat.png',
-        width: 200,
-        height: 80,
+        width: 200 * scaleFactor,
+        height: 80 * scaleFactor,
         fit: BoxFit.contain,
         errorBuilder: (
           BuildContext context,
@@ -170,18 +188,25 @@ class _ReciboFormState extends State<ReciboForm> {
         ) {
           debugPrint('Error loading image: $error');
           return Container(
-            width: 200,
-            height: 80,
+            width: 200 * scaleFactor,
+            height: 80 * scaleFactor,
             color: Colors.grey[200],
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, color: Colors.red, size: 24),
-                const SizedBox(height: 8),
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 24 * scaleFactor,
+                ),
+                SizedBox(height: 8 * scaleFactor),
                 Text(
                   'No se encontró\npeque-veflat-1.png',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 12 * scaleFactor,
+                    color: Colors.grey[600],
+                  ),
                 ),
               ],
             ),
@@ -191,70 +216,77 @@ class _ReciboFormState extends State<ReciboForm> {
     );
   }
 
-  Widget _buildCustomerInfo(ReciboData data) {
+  Widget _buildCustomerInfo(ReciboData data, double scaleFactor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Mostrar nombre y apellido cargados localmente
         _buildInfoLine(
           'Cliente: ${nombre ?? "No disponible"} ${apellido ?? ""}',
+          scaleFactor,
         ),
-        const SizedBox(height: 16),
-        _buildInfoLine('RIF: ${data.rif}'),
-        const SizedBox(height: 16),
-        _buildInfoLine('Afil: ${data.afiliacion}'),
-        const SizedBox(height: 16),
-        _buildInfoLine('Term: ${data.terminal} Aprob: ${data.aprobacion}'),
-        const SizedBox(height: 16),
-        _buildInfoLine('Nro. Cta.: ${data.numeroCuenta}'),
-        const SizedBox(height: 16),
+        SizedBox(height: 16 * scaleFactor),
+        _buildInfoLine('RIF: ${data.rif}', scaleFactor),
+        SizedBox(height: 16 * scaleFactor),
+        _buildInfoLine('Afil: ${data.afiliacion}', scaleFactor),
+        SizedBox(height: 16 * scaleFactor),
+        _buildInfoLine(
+          'Term: ${data.terminal} Aprob: ${data.aprobacion}',
+          scaleFactor,
+        ),
+        SizedBox(height: 16 * scaleFactor),
+        _buildInfoLine('Nro. Cta.: ${data.numeroCuenta}', scaleFactor),
+        SizedBox(height: 16 * scaleFactor),
         Row(
           children: [
-            Text(data.fecha, style: const TextStyle(fontSize: 20)),
-            const SizedBox(width: 14),
-            Text(data.hora, style: const TextStyle(fontSize: 20)),
+            Text(data.fecha, style: TextStyle(fontSize: 20 * scaleFactor)),
+            SizedBox(width: 14 * scaleFactor),
+            Text(data.hora, style: TextStyle(fontSize: 20 * scaleFactor)),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildInfoLine(String text) {
-    return Text(text, style: const TextStyle(fontSize: 20));
+  Widget _buildInfoLine(String text, double scaleFactor) {
+    return Text(text, style: TextStyle(fontSize: 20 * scaleFactor));
   }
 
-  Widget _buildAmountSection(ReciboData data) {
+  Widget _buildAmountSection(ReciboData data, double scaleFactor) {
     return Container(
       color: const Color(0xFFE2E2E2),
       child: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.all(32),
+            padding: EdgeInsets.all(32 * scaleFactor),
             child: Column(
               children: [
-                const SizedBox(height: 20),
+                SizedBox(height: 20 * scaleFactor),
                 Container(
-                  width: 53,
-                  height: 51,
+                  width: 53 * scaleFactor,
+                  height: 51 * scaleFactor,
                   decoration: const BoxDecoration(
                     color: Color(0xFF23AB52),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.check, color: Colors.white, size: 30),
+                  child: Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 30 * scaleFactor,
+                  ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20 * scaleFactor),
                 Text(
                   'BS. ${data.monto.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 48,
+                  style: TextStyle(
+                    fontSize: 48 * scaleFactor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24 * scaleFactor),
                 Text(
                   '${data.tipoTransaccion} - ${data.estado} - 1',
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: TextStyle(
+                    fontSize: 24 * scaleFactor,
                     fontWeight: FontWeight.w300,
                   ),
                 ),
@@ -266,37 +298,46 @@ class _ReciboFormState extends State<ReciboForm> {
     );
   }
 
-  Widget _buildSignatureSection() {
+  Widget _buildSignatureSection(double scaleFactor) {
     return Column(
       children: [
         _buildDashedLine(),
-        const SizedBox(height: 32),
+        SizedBox(height: 32 * scaleFactor),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [_buildShortDashedLine(), _buildShortDashedLine()],
+          children: [
+            _buildShortDashedLine(scaleFactor),
+            _buildShortDashedLine(scaleFactor),
+          ],
         ),
-        const SizedBox(height: 16),
-        const Text('FIRMA DEL CLIENTE', style: TextStyle(fontSize: 14)),
-        const SizedBox(height: 32),
-
-        // Mostrar la firma guardada
+        SizedBox(height: 16 * scaleFactor),
+        Text('FIRMA DEL CLIENTE', style: TextStyle(fontSize: 14 * scaleFactor)),
+        SizedBox(height: 32 * scaleFactor),
         firma != null
-            ? Image.memory(firma!, height: 94, fit: BoxFit.contain)
+            ? Image.memory(
+              firma!,
+              height: 94 * scaleFactor,
+              fit: BoxFit.contain,
+            )
             : Container(
-              height: 94,
+              height: 94 * scaleFactor,
               color: Colors.grey[200],
-              child: const Center(child: Text('Firma no disponible')),
+              child: Center(
+                child: Text(
+                  'Firma no disponible',
+                  style: TextStyle(fontSize: 14 * scaleFactor),
+                ),
+              ),
             ),
-
-        const SizedBox(height: 16),
+        SizedBox(height: 16 * scaleFactor),
         Container(height: 2, color: const Color(0xFF212121)),
-        const SizedBox(height: 32),
-        const Text(
+        SizedBox(height: 32 * scaleFactor),
+        Text(
           'Reconozco el pago descrito en este\nrecibo',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: 16 * scaleFactor),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16 * scaleFactor),
         _buildPurpleDashedLine(),
       ],
     );
@@ -309,9 +350,9 @@ class _ReciboFormState extends State<ReciboForm> {
     );
   }
 
-  Widget _buildShortDashedLine() {
+  Widget _buildShortDashedLine(double scaleFactor) {
     return SizedBox(
-      width: 112,
+      width: 112 * scaleFactor,
       child: CustomPaint(painter: DashedLinePainter(color: Colors.black)),
     );
   }
@@ -323,13 +364,13 @@ class _ReciboFormState extends State<ReciboForm> {
     );
   }
 
-  Widget _buildPrintButton(ReciboState state) {
+  Widget _buildPrintButton(ReciboState state, double scaleFactor) {
     final isPrinting = state is ReciboPrinting;
     final isPrinted = state is ReciboPrinted;
 
     return SizedBox(
       width: double.infinity,
-      height: 48,
+      height: 48 * (scaleFactor < 0.9 ? 0.9 : scaleFactor),
       child: ElevatedButton(
         onPressed:
             isPrinting
@@ -341,39 +382,44 @@ class _ReciboFormState extends State<ReciboForm> {
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8 * scaleFactor),
             side: const BorderSide(color: Color(0xFF3C029C)),
           ),
           elevation: 1,
         ),
         child:
             isPrinting
-                ? const SizedBox(
-                  width: 20,
-                  height: 20,
+                ? SizedBox(
+                  width: 20 * scaleFactor,
+                  height: 20 * scaleFactor,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Colors.white,
+                    ),
                   ),
                 )
                 : isPrinted
-                ? const Row(
+                ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.check, size: 20),
-                    SizedBox(width: 8),
+                    Icon(Icons.check, size: 20 * scaleFactor),
+                    SizedBox(width: 8 * scaleFactor),
                     Text(
                       'Impreso',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 16 * scaleFactor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 )
-                : const Text(
+                : Text(
                   'Imprimir',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontSize: 16 * scaleFactor,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
       ),
     );
