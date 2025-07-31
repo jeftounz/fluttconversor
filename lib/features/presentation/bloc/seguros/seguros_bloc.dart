@@ -127,15 +127,16 @@ class SegurosBloc extends Bloc<SegurosEvent, SegurosState> {
     }
   }
 
-  // Método para recalcular los montos en dólares y bolívares
+  // 🔽🔽🔽 MÉTODO MODIFICADO (solo cambia esta sección) 🔽🔽🔽
   void _recalcularMontos(Emitter<SegurosState> emit) {
     if (state.selectedInsuranceType == null || state.tasaBCV <= 0) {
-      // No hay suficiente información para calcular
       return;
     }
 
     final precioBase = state.precioBase;
     final tasa = state.tasaBCV;
+
+    // Cálculo corregido: precioBase * tasaBCV
     final montoBolivares = precioBase * tasa;
 
     emit(

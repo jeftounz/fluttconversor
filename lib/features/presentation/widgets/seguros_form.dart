@@ -173,41 +173,46 @@ class _PriceSection extends StatelessWidget {
         print('formattedPrice: ${state.formattedPrice}');
         print('selectedPaymentPlan: ${state.selectedPaymentPlan?.name}');
         print('selectedInsuranceType: ${state.selectedInsuranceType?.name}');
+        print('tasaBCV: ${state.tasaBCV}'); // Nuevo log
         print('=====================================');
 
         return Container(
           color: const Color(0xFF18191B),
-          height: 108,
           padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
+              // Primera fila: Precios en dólares y bolívares
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     state.formattedPrice,
                     style: const TextStyle(color: Colors.white, fontSize: 36),
                   ),
-                  const Text(
-                    '1 cuota al año',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
                   Text(
                     state.bolivarPrice,
                     style: const TextStyle(color: Colors.white, fontSize: 36),
                   ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Segunda fila: Detalles de pago y tasa BCV
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   const Text(
-                    'Cambio BCV',
+                    '1 cuota al año',
                     style: TextStyle(color: Colors.white),
                   ),
+                  // Mostramos la tasa BCV si está disponible
+                  if (state.tasaBCV > 0)
+                    Text(
+                      'Tasa BCV: ${state.tasaBCV.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
                 ],
               ),
             ],
